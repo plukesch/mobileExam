@@ -17,6 +17,7 @@
 package at.ac.hcw.procrastinot.data
 
 import kotlinx.coroutines.flow.Flow
+import at.ac.hcw.procrastinot.data.Priority
 
 /**
  * Interface to the data layer.
@@ -35,9 +36,9 @@ interface TaskRepository {
 
     suspend fun refreshTask(taskId: String)
 
-    suspend fun createTask(title: String, description: String): String
+    suspend fun createTask(title: String, description: String, priority: Priority = Priority.NONE): String
 
-    suspend fun updateTask(taskId: String, title: String, description: String)
+    suspend fun updateTask(taskId: String, title: String, description: String, priority: Priority = Priority.NONE)
 
     suspend fun clearCompletedTasks()
 

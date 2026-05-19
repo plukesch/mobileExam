@@ -14,40 +14,8 @@
  * limitations under the License.
  */
 
-package at.ac.hcw.procrastinot.tasks
+package at.ac.hcw.procrastinot.data
 
-/**
- * Used with the filter spinner in the tasks list.
- */
-enum class TasksFilterType {
-    /**
-     * Do not filter tasks.
-     */
-    ALL_TASKS,
-
-    /**
-     * Filters only the active (not completed yet) tasks.
-     */
-    ACTIVE_TASKS,
-
-    /**
-     * Filters only the completed tasks.
-     */
-    COMPLETED_TASKS,
-
-    /**
-     * Filters only high priority tasks.
-     */
-    HIGH_PRIORITY,
-
-    /**
-     * Filters only medium priority tasks.
-     */
-    MEDIUM_PRIORITY,
-
-    /**
-     * Filters only low priority tasks.
-     */
-    LOW_PRIORITY
+enum class Priority {
+    HIGH, MEDIUM, LOW, NONE
 }
-

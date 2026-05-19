@@ -16,6 +16,7 @@
 
 package at.ac.hcw.procrastinot.data
 
+import at.ac.hcw.procrastinot.data.Priority
 import at.ac.hcw.procrastinot.data.source.local.LocalTask
 import at.ac.hcw.procrastinot.data.source.network.NetworkTask
 import at.ac.hcw.procrastinot.data.source.network.TaskStatus
@@ -40,6 +41,7 @@ fun Task.toLocal() = LocalTask(
     title = title,
     description = description,
     isCompleted = isCompleted,
+    priority = priority.name,
 )
 
 fun List<Task>.toLocal() = map(Task::toLocal)
@@ -50,6 +52,7 @@ fun LocalTask.toExternal() = Task(
     title = title,
     description = description,
     isCompleted = isCompleted,
+    priority = runCatching { Priority.valueOf(priority) }.getOrDefault(Priority.NONE),
 )
 
 // Note: JvmName is used to provide a unique name for each extension function with the same name.
@@ -64,6 +67,12 @@ fun NetworkTask.toLocal() = LocalTask(
     title = title,
     description = shortDescription,
     isCompleted = (status == TaskStatus.COMPLETE),
+    priority = when (priority) {
+        1 -> Priority.HIGH.name
+        2 -> Priority.MEDIUM.name
+        3 -> Priority.LOW.name
+        else -> Priority.NONE.name
+    },
 )
 
 @JvmName("networkToLocal")
@@ -74,7 +83,13 @@ fun LocalTask.toNetwork() = NetworkTask(
     id = id,
     title = title,
     shortDescription = description,
-    status = if (isCompleted) { TaskStatus.COMPLETE } else { TaskStatus.ACTIVE }
+    status = if (isCompleted) { TaskStatus.COMPLETE } else { TaskStatus.ACTIVE },
+    priority = when (priority) {
+        Priority.HIGH.name -> 1
+        Priority.MEDIUM.name -> 2
+        Priority.LOW.name -> 3
+        else -> null
+    },
 )
 
 fun List<LocalTask>.toNetwork() = map(LocalTask::toNetwork)

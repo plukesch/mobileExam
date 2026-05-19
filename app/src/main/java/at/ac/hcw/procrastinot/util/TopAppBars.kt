@@ -56,6 +56,9 @@ fun TasksTopAppBar(
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
     onFilterCompletedTasks: () -> Unit,
+    onFilterHighPriorityTasks: () -> Unit,
+    onFilterMediumPriorityTasks: () -> Unit,
+    onFilterLowPriorityTasks: () -> Unit,
     onClearCompletedTasks: () -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -67,7 +70,10 @@ fun TasksTopAppBar(
             }
         },
         actions = {
-            FilterTasksMenu(onFilterAllTasks, onFilterActiveTasks, onFilterCompletedTasks)
+            FilterTasksMenu(
+                onFilterAllTasks, onFilterActiveTasks, onFilterCompletedTasks,
+                onFilterHighPriorityTasks, onFilterMediumPriorityTasks, onFilterLowPriorityTasks
+            )
             MoreTasksMenu(onClearCompletedTasks, onRefresh)
         },
         modifier = Modifier.fillMaxWidth()
@@ -78,7 +84,10 @@ fun TasksTopAppBar(
 private fun FilterTasksMenu(
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
-    onFilterCompletedTasks: () -> Unit
+    onFilterCompletedTasks: () -> Unit,
+    onFilterHighPriorityTasks: () -> Unit,
+    onFilterMediumPriorityTasks: () -> Unit,
+    onFilterLowPriorityTasks: () -> Unit,
 ) {
     TopAppBarDropdownMenu(
         iconContent = {
@@ -96,6 +105,15 @@ private fun FilterTasksMenu(
         )
         DropdownMenuItem(onClick = { onFilterCompletedTasks(); closeMenu() },
             text = { Text(text = stringResource(id = R.string.nav_completed)) }
+        )
+        DropdownMenuItem(onClick = { onFilterHighPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.priority_high)) }
+        )
+        DropdownMenuItem(onClick = { onFilterMediumPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.priority_medium)) }
+        )
+        DropdownMenuItem(onClick = { onFilterLowPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.priority_low)) }
         )
     }
 }
@@ -193,7 +211,7 @@ fun AddEditTaskTopAppBar(@StringRes title: Int, onBack: () -> Unit) {
 private fun TasksTopAppBarPreview() {
     TodoTheme {
         Surface {
-            TasksTopAppBar({}, {}, {}, {}, {}, {})
+            TasksTopAppBar({}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

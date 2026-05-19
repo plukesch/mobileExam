@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.ac.hcw.procrastinot.R
 import at.ac.hcw.procrastinot.TodoDestinationsArgs
+import at.ac.hcw.procrastinot.data.Priority
 import at.ac.hcw.procrastinot.data.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +38,7 @@ data class AddEditTaskUiState(
     val title: String = "",
     val description: String = "",
     val isTaskCompleted: Boolean = false,
+    val priority: Priority = Priority.NONE,
     val isLoading: Boolean = false,
     val userMessage: Int? = null,
     val isTaskSaved: Boolean = false
@@ -99,8 +101,19 @@ class AddEditTaskViewModel @Inject constructor(
         }
     }
 
+    fun updatePriority(newPriority: Priority) {
+        _uiState.update {
+            // tapping the already-selected priority deselects it (sets to NONE)
+            it.copy(priority = if (it.priority == newPriority) Priority.NONE else newPriority)
+        }
+    }
+
     private fun createNewTask() = viewModelScope.launch {
-        taskRepository.createTask(uiState.value.title, uiState.value.description)
+        taskRepository.createTask(
+            uiState.value.title,
+            uiState.value.description,
+            uiState.value.priority
+        )
         _uiState.update {
             it.copy(isTaskSaved = true)
         }
@@ -115,6 +128,7 @@ class AddEditTaskViewModel @Inject constructor(
                 taskId,
                 title = uiState.value.title,
                 description = uiState.value.description,
+                priority = uiState.value.priority,
             )
             _uiState.update {
                 it.copy(isTaskSaved = true)
@@ -134,6 +148,7 @@ class AddEditTaskViewModel @Inject constructor(
                             title = task.title,
                             description = task.description,
                             isTaskCompleted = task.isCompleted,
+                            priority = task.priority,
                             isLoading = false
                         )
                     }

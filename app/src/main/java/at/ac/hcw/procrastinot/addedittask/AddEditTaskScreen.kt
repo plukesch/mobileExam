@@ -19,7 +19,10 @@
 package at.ac.hcw.procrastinot.addedittask
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,9 +31,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -55,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import at.ac.hcw.procrastinot.R
+import at.ac.hcw.procrastinot.data.Priority
 import at.ac.hcw.procrastinot.util.AddEditTaskTopAppBar
 
 @Composable
@@ -82,8 +89,10 @@ fun AddEditTaskScreen(
             loading = uiState.isLoading,
             title = uiState.title,
             description = uiState.description,
+            priority = uiState.priority,
             onTitleChanged = viewModel::updateTitle,
             onDescriptionChanged = viewModel::updateDescription,
+            onPriorityChanged = viewModel::updatePriority,
             modifier = Modifier.padding(paddingValues)
         )
 
@@ -106,12 +115,22 @@ fun AddEditTaskScreen(
 }
 
 @Composable
+private fun priorityColor(priority: Priority): Color = when (priority) {
+    Priority.HIGH -> Color.Red
+    Priority.MEDIUM -> Color(0xFFFF9800)
+    Priority.LOW -> Color(0xFF2196F3)
+    Priority.NONE -> Color.Gray
+}
+
+@Composable
 private fun AddEditTaskContent(
     loading: Boolean,
     title: String,
     description: String,
+    priority: Priority,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    onPriorityChanged: (Priority) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
@@ -159,6 +178,45 @@ private fun AddEditTaskContent(
                     .fillMaxWidth(),
                 colors = textFieldColors
             )
+            Text(
+                text = stringResource(id = R.string.priority_label),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(Priority.HIGH, Priority.MEDIUM, Priority.LOW).forEach { p ->
+                    val isSelected = priority == p
+                    val color = priorityColor(p)
+                    val label = stringResource(
+                        id = when (p) {
+                            Priority.HIGH -> R.string.priority_high
+                            Priority.MEDIUM -> R.string.priority_medium
+                            Priority.LOW -> R.string.priority_low
+                            Priority.NONE -> R.string.priority_none
+                        }
+                    )
+                    if (isSelected) {
+                        Button(
+                            onClick = { onPriorityChanged(p) },
+                            colors = ButtonDefaults.buttonColors(containerColor = color),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(label, color = Color.White)
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { onPriorityChanged(p) },
+                            border = BorderStroke(1.dp, color),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(label, color = color)
+                        }
+                    }
+                }
+            }
         }
     }
 }
