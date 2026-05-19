@@ -125,6 +125,8 @@ class TasksViewModel @Inject constructor(
     }
 
     fun showEditResultMessage(result: Int) {
+        if (savedStateHandle.get<Boolean>(EDIT_RESULT_HANDLED_KEY) == true) return
+        savedStateHandle[EDIT_RESULT_HANDLED_KEY] = true
         when (result) {
             EDIT_RESULT_OK -> showSnackbarMessage(R.string.successfully_saved_task_message)
             ADD_EDIT_RESULT_OK -> showSnackbarMessage(R.string.successfully_added_task_message)
@@ -217,6 +219,9 @@ class TasksViewModel @Inject constructor(
 
 // Used to save the current filtering in SavedStateHandle.
 const val TASKS_FILTER_SAVED_STATE_KEY = "TASKS_FILTER_SAVED_STATE_KEY"
+
+// Used to ensure navigation result Snackbars are shown only once.
+const val EDIT_RESULT_HANDLED_KEY = "EDIT_RESULT_HANDLED_KEY"
 
 data class FilteringUiInfo(
     val currentFilteringLabel: Int = R.string.label_all,
