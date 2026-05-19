@@ -115,6 +115,11 @@ class TasksViewModel @Inject constructor(
         }
     }
 
+    fun deleteTask(taskId: String) = viewModelScope.launch {
+        taskRepository.deleteTask(taskId)
+        showSnackbarMessage(R.string.successfully_deleted_task_message)
+    }
+
     fun completeTask(task: Task, completed: Boolean) = viewModelScope.launch {
         taskRepository.completeTask(task.id, completed)
         if (completed) {

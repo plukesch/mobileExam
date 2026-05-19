@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package at.ac.hcw.procrastinot.tasks
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,7 +35,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -39,7 +45,10 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -114,6 +123,7 @@ fun TasksScreen(
             onRefresh = viewModel::refresh,
             onTaskClick = onTaskClick,
             onTaskCheckedChange = viewModel::completeTask,
+            onTaskDismissed = { task -> viewModel.deleteTask(task.id) },
             modifier = Modifier.padding(paddingValues)
         )
 
@@ -147,6 +157,7 @@ private fun TasksContent(
     onRefresh: () -> Unit,
     onTaskClick: (Task) -> Unit,
     onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onTaskDismissed: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LoadingContent(
@@ -169,12 +180,45 @@ private fun TasksContent(
                 style = MaterialTheme.typography.headlineSmall
             )
             LazyColumn {
-                items(tasks) { task ->
-                    TaskItem(
-                        task = task,
-                        onTaskClick = onTaskClick,
-                        onCheckedChange = { onTaskCheckedChange(task, it) }
+                items(tasks, key = { task -> task.id }) { task ->
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { value ->
+                            if (value == SwipeToDismissBoxValue.EndToStart) {
+                                onTaskDismissed(task)
+                                true
+                            } else {
+                                false
+                            }
+                        }
                     )
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        enableDismissFromStartToEnd = false,
+                        backgroundContent = {
+                            val isSwiping = dismissState.targetValue == SwipeToDismissBoxValue.EndToStart
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(if (isSwiping) Color.Red else Color.Transparent)
+                                    .padding(end = 16.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                if (isSwiping) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = stringResource(R.string.menu_delete_task),
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        TaskItem(
+                            task = task,
+                            onTaskClick = onTaskClick,
+                            onCheckedChange = { onTaskCheckedChange(task, it) }
+                        )
+                    }
                 }
             }
         }
@@ -300,6 +344,7 @@ private fun TasksContentPreview() {
                 onRefresh = { },
                 onTaskClick = { },
                 onTaskCheckedChange = { _, _ -> },
+                onTaskDismissed = { },
             )
         }
     }
@@ -319,6 +364,7 @@ private fun TasksContentEmptyPreview() {
                 onRefresh = { },
                 onTaskClick = { },
                 onTaskCheckedChange = { _, _ -> },
+                onTaskDismissed = { },
             )
         }
     }
